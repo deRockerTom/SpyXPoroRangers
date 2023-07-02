@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>SpyXPoroRangers</title>
+  <script src="js/axios.min.js" type="module"></script>
+  <script src="js/lol.js" type="module"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <h1>SpyXPoroRangers</h1>
+  <div class="input-group">
+    <label for="player1">
+      Player 1:
+      <input type="text" id="player1">
+    </label>
+    <label for="player2">
+      Player 2:
+      <input type="text" id="player2">
+    </label>
+  </div>
+  <div class="number-games">
+    <label for="nbGames">Number of Games:</label>
+    <input type="number" id="nbGames">
+  </div>
+
+  <button id="btnGetMatch">Get Match</button>
+
+  <h1>Match Results</h1>
+  <div id="numGames" style="display: none;"></div>
+  <div id="dates" style="display: none;"></div>
+
+  <script>
+    // Place the JavaScript code here if you don't have a separate JS file
+    // Update visibility when adding data to these divs.
+    function updateDivVisibility() {
+      const numGamesDiv = document.getElementById('numGames');
+      const datesDiv = document.getElementById('dates');
+
+      numGamesDiv.style.display = numGamesDiv.innerHTML !== '' ? 'flex' : 'none';
+      datesDiv.style.display = datesDiv.innerHTML !== '' ? 'flex' : 'none';
+    }
+
+    document.getElementById('nbGames').addEventListener('keyup', function (event) {
+      // Number 13 is the "Enter" key on the keyboard
+      if (event.key === "Enter" || event.keyCode === 13) {
+        // Cancel the default action, if needed
+        event.preventDefault();
+        // Trigger the button click
+        document.getElementById('btnGetMatch').click();
+      }
+    });
+  </script>
+</body>
+
+</html>
