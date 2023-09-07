@@ -121,14 +121,14 @@ async function handleButtonClick() {
         // Display the number of games
         var numGamesElement = document.getElementById('numGames');
         if (numGames > 0) {
-            numGamesElement.innerHTML = `Number of games played together in the last ${nb} games: ${numGames}`;
+            numGamesElement.innerHTML = `Number of games played together in the last ${nbGames} games: ${numGames}`;
 
             // Display the dates
             var datesElement = document.getElementById('dates');
             datesElement.innerHTML = 'Dates: <br>' + dates.join('<br>');
         }
         else {
-            numGamesElement.innerHTML = `No games played together in the last ${nb} games`;
+            numGamesElement.innerHTML = `No games played together in the last ${nbGames} games`;
         }
         removeErrorMessage();
         updateDivVisibility();
