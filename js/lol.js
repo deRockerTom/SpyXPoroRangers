@@ -4,6 +4,9 @@ async function getMatch(player1, player2, nbGames) {
     // replace spaces with %20
     player1 = player1.replace(/ /g, '%20');
     player2 = player2.replace(/ /g, '%20');
+    if (nbGames < 0) {
+        throw new Error('Number of games must be positive');
+    }
 
     const requests = [];
     for (let i = 0; i < nbGames; i += 10) {
@@ -23,7 +26,7 @@ async function getMatch(player1, player2, nbGames) {
 
     // Check if all responses have error status 'Not found'
     if (responses.every(response => response.error === 'Not found')) {
-        throw new Error('No match found');
+        throw new Error('Player not found');
     }
 
     const arr = [];
@@ -50,6 +53,42 @@ function formatDate(date) {
     return date.toLocaleDateString(undefined, options);
 }
 
+function updateDivVisibility() {
+    const numGamesDiv = document.getElementById('numGames');
+    const datesDiv = document.getElementById('dates');
+
+    numGamesDiv.style.display = numGamesDiv.innerHTML !== '' ? 'flex' : 'none';
+    datesDiv.style.display = datesDiv.innerHTML !== '' ? 'flex' : 'none';
+}
+
+function removeErrorMessage() {
+    document.getElementById('error').innerHTML = '';
+}
+
+function roundToNextTenth(num) {
+    return Math.ceil(num / 10) * 10;
+}
+
+function handleError(error) {
+    switch (error.message) {
+        case 'Please enter both players':
+            document.getElementById('error').innerHTML = 'Please enter both players';
+            break;
+        case 'Please enter a positive number of games':
+            document.getElementById('error').innerHTML = 'Please enter a positive number of games';
+            break;
+        case 'Player not found':
+            document.getElementById('error').innerHTML = 'One of the players doesn\'t exist';
+            break;
+        default:
+            document.getElementById('error').innerHTML = 'An error occurred, please try again';
+            console.log(error);
+            break;
+    }
+    document.getElementById('numGames').innerHTML = '';
+}
+
+
 async function handleButtonClick() {
     const player1Input = document.getElementById('player1');
     const player2Input = document.getElementById('player2');
@@ -58,12 +97,20 @@ async function handleButtonClick() {
 
     const player1 = player1Input.value;
     const player2 = player2Input.value;
-    const nbGames = parseInt(nbGamesInput.value);
-
-    loadingButton.disabled = true;
-    loadingButton.textContent = 'Loading...';
-
     try {
+        if (player1 === '' || player2 === '') {
+            throw new Error('Please enter both players');
+        }
+        const nb = parseInt(nbGamesInput.value);
+        if (!nb || nb <= 0) {
+            throw new Error('Please enter a positive number of games');
+        }
+        const nbGames = roundToNextTenth(nb)
+        console.log(nbGames);
+
+        loadingButton.disabled = true;
+        loadingButton.textContent = 'Loading...';
+
         const matchData = await getMatch(player1, player2, nbGames);
         console.log(matchData);
         var numGames = matchData.length;
@@ -73,25 +120,20 @@ async function handleButtonClick() {
 
         // Display the number of games
         var numGamesElement = document.getElementById('numGames');
-        numGamesElement.innerHTML = 'Number of games played together: ' + numGames;
+        if (numGames > 0) {
+            numGamesElement.innerHTML = `Number of games played together in the last ${nb} games: ${numGames}`;
 
-        // Display the dates
-        var datesElement = document.getElementById('dates');
-        datesElement.innerHTML = 'Dates: <br>' + dates.join('<br>');
+            // Display the dates
+            var datesElement = document.getElementById('dates');
+            datesElement.innerHTML = 'Dates: <br>' + dates.join('<br>');
+        }
+        else {
+            numGamesElement.innerHTML = `No games played together in the last ${nb} games`;
+        }
+        removeErrorMessage();
         updateDivVisibility();
     } catch (error) {
-        if (error.message !== 'No match found') {
-            alert('An error occurred');
-            console.log(error);
-        }
-        // Display the number of games
-        var numGamesElement = document.getElementById('numGames');
-        numGamesElement.innerHTML = 'Number of games played together: ' + 0;
-
-        // Display the dates
-        var datesElement = document.getElementById('dates');
-        datesElement.innerHTML = '';
-        updateDivVisibility();
+        handleError(error);
     } finally {
         loadingButton.disabled = false;
         loadingButton.textContent = 'Get Match';
@@ -99,3 +141,13 @@ async function handleButtonClick() {
 }
 
 document.getElementById('btnGetMatch').addEventListener('click', handleButtonClick);
+
+document.getElementById('nbGames').addEventListener('keyup', function (event) {
+    // Number 13 is the "Enter" key on the keyboard
+    if (event.key === "Enter" || event.keyCode === 13) {
+        // Cancel the default action, if needed
+        event.preventDefault();
+        // Trigger the button click
+        document.getElementById('btnGetMatch').click();
+    }
+});
