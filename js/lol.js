@@ -1,5 +1,7 @@
 const api = 'https://api-bqmvjmtk6q-uc.a.run.app/matches/get/single/';
 
+const NUMBER_OF_MATCH_FETCHED = 25;
+
 async function getMatch(player1, player2, nbGames) {
     // replace spaces with %20
     player1 = player1.replace(/ /g, '%20');
@@ -9,7 +11,7 @@ async function getMatch(player1, player2, nbGames) {
     }
 
     const requests = [];
-    for (let i = 0; i < nbGames; i += 10) {
+    for (let i = 0; i < nbGames; i += NUMBER_OF_MATCH_FETCHED) {
         const requestPromise = axios.get(api + player1 + '/' + player2 + '/' + i.toString() + '/euw1');
         requests.push({ index: i, promise: requestPromise });
     }
@@ -34,7 +36,6 @@ async function getMatch(player1, player2, nbGames) {
         for (let j = 0; j < response.data.singleResults.length; j++) {
             arr.push(response.data.singleResults[j]);
         }
-        console.log(response.data);
     }
 
     // Sort the data based on your desired criteria
@@ -65,8 +66,8 @@ function removeErrorMessage() {
     document.getElementById('error').innerHTML = '';
 }
 
-function roundToNextTenth(num) {
-    return Math.ceil(num / 10) * 10;
+function roundToNumberOfMatchs(num) {
+    return Math.ceil(num / NUMBER_OF_MATCH_FETCHED) * NUMBER_OF_MATCH_FETCHED;
 }
 
 function handleError(error) {
@@ -82,7 +83,7 @@ function handleError(error) {
             break;
         default:
             document.getElementById('error').innerHTML = 'An error occurred, please try again';
-            console.log(error);
+            console.error(error);
             break;
     }
     document.getElementById('numGames').innerHTML = '';
@@ -105,14 +106,12 @@ async function handleButtonClick() {
         if (!nb || nb <= 0) {
             throw new Error('Please enter a positive number of games');
         }
-        const nbGames = roundToNextTenth(nb)
-        console.log(nbGames);
+        const nbGames = roundToNumberOfMatchs(nb)
 
         loadingButton.disabled = true;
         loadingButton.textContent = 'Loading...';
 
         const matchData = await getMatch(player1, player2, nbGames);
-        console.log(matchData);
         var numGames = matchData.length;
         var dates = matchData.map(function (match) {
             return formatDate(new Date(match.player1.gameStartTime));
