@@ -87,6 +87,7 @@ function handleError(error) {
             break;
     }
     document.getElementById('numGames').innerHTML = '';
+    document.getElementById('dates').innerHTML = '';
 }
 
 
@@ -128,6 +129,7 @@ async function handleButtonClick() {
         }
         else {
             numGamesElement.innerHTML = `No games played together in the last ${nbGames} games`;
+            datesElement.innerHTML = '';
         }
         removeErrorMessage();
         updateDivVisibility();
